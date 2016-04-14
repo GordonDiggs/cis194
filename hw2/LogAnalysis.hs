@@ -13,3 +13,18 @@ parseMessage str = case words(str) of
 
 parse :: String -> [LogMessage]
 parse str = map parseMessage (lines(str))
+
+messageTimestamp :: LogMessage -> TimeStamp
+messageTimestamp (LogMessage _ timestamp _) = timestamp
+messageTimestamp (Unknown _) = undefined
+
+treeMessage :: MessageTree -> LogMessage
+treeMessage (Node _ msg _) = msg
+treeMessage (Leaf) = undefined
+
+insert :: LogMessage -> MessageTree -> MessageTree
+insert (Unknown _) tree = tree
+insert msg Leaf = Node Leaf msg Leaf
+insert msg tree
+  | messageTimestamp msg <= messageTimestamp (treeMessage tree) = Node Leaf msg tree
+  | messageTimestamp msg > messageTimestamp (treeMessage tree) = Node tree msg Leaf
